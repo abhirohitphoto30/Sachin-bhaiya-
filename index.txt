@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <title>TXT File Formatter</title>
+    <style>
+        body { 
+            font-family: sans-serif; 
+            padding: 20px; 
+            line-height: 1.6; 
+            background-color: #f9f9f9;
+        }
+        h2 { color: #333; }
+        input[type="file"] {
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        #output { 
+            white-space: pre-wrap; 
+            background: #fff; 
+            padding: 15px; 
+            border: 1px solid #ccc; 
+            margin-top: 20px; 
+            max-height: 500px; 
+            overflow-y: auto; 
+            display: none; 
+            border-radius: 5px;
+        }
+        #downloadBtn { 
+            display: none; 
+            padding: 10px 20px; 
+            background-color: #28a745; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            border-radius: 5px; 
+            font-size: 16px; 
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        #downloadBtn:hover { 
+            background-color: #218838; 
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Upload Text File to Format</h2>
+    <input type="file" id="fileInput" accept=".txt"><br>
+    
+    <button id="downloadBtn">Download Formatted .txt</button>
+    
+    <div id="output"></div>
+
+    <script>
+        // Global variable jisme humara formatted text save hoga
+        let processedText = ""; 
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                let text = e.target.result;
+                
+                // Ex: wale line ke baad ek extra blank line (double newline) add karne ka logic
+                processedText = text.replace(/(Ex:.*?)(?=\nQ|$)/gi, "$1\n\n");
+                
+                // Screen par formatted text dikhane ke liye
+                const outputDiv = document.getElementById('output');
+                outputDiv.textContent = processedText;
+                outputDiv.style.display = "block";
+                
+                // Download button ko visible karne ke liye
+                document.getElementById('downloadBtn').style.display = "inline-block";
+            };
+            reader.readAsText(file);
+        });
+
+        // Download button ka logic
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            if (!processedText) {
+                alert("Pehle file upload karein!");
+                return;
+            }
+
+            // Browser mein text se file banane ka code (Blob API)
+            const blob = new Blob([processedText], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+            
+            // Ek temporary link create karke automatically click karwana
+            const a = document.createElement("a");
+            a.href = url;
+            
+            // Download hone wali file ka naya naam
+            a.download = "Formatted_Questions.txt"; 
+            
+            document.body.appendChild(a);
+            a.click(); // Auto click for download
+            
+            // Memory clear karne ke liye
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+    </script>
+</body>
+</html>
